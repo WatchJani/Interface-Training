@@ -57,14 +57,14 @@ func toCSVRecords(data interface{}) ([][]string, error) {
 	return records, nil
 }
 
-func Write() map[string]func(data any, writer io.Writer) {
+func Write() map[int]func(data any, writer io.Writer) {
 	json, cvs := &JSON{}, &CVS{}
 
-	return map[string]func(data any, writer io.Writer){
-		"json": func(data any, writer io.Writer) {
+	return map[int]func(data any, writer io.Writer){
+		0: func(data any, writer io.Writer) {
 			json.Transform(data, writer)
 		},
-		"cvs": func(data any, writer io.Writer) {
+		1: func(data any, writer io.Writer) {
 			cvs.Transform(data, writer)
 		},
 	}
@@ -84,6 +84,11 @@ func New(name string, age int, location string) *Human {
 	}
 }
 
+const (
+	JSONFormat int = iota
+	CVSFormat
+)
+
 func main() {
 	file, err := os.Create("./test.txt")
 	if err != nil {
@@ -95,10 +100,10 @@ func main() {
 	formate := Write()
 
 	human := New("John", 21, "NYC")
-	formate["json"](human, file)
+	formate[JSONFormat](human, file)
 
 	buf := bytes.NewBuffer(make([]byte, 4096))
-	formate["json"](human, buf)
+	formate[JSONFormat](human, buf)
 
 	fmt.Println(buf)
 }
